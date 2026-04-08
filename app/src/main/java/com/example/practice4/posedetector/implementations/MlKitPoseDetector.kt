@@ -28,17 +28,25 @@ class MlKitPoseDetector @Inject constructor() : IPoseDetector {
 
         detector.process(image)
             .addOnSuccessListener { pose ->
-                val landmarks = pose.allPoseLandmarks
-                    .filter { it.inFrameLikelihood >= 0.3f }
+                val allLandmarks = pose.allPoseLandmarks
+                
+                // Логируем для отладки, если вообще ничего не найдено
+                if (allLandmarks.isEmpty()) {
+                    if (System.currentTimeMillis() % 100 == 0L) {
+                        Log.w("MlKitPoseDetector", "ML Kit returned ZERO landmarks. Bitmap size: ${bitmap.width}x${bitmap.height}")
+                    }
+                }
+
+                val landmarks = allLandmarks
+                    .filter { it.inFrameLikelihood >= 0.1f } // Снижаем до минимума для теста
                     .associate { lm ->
                         lm.landmarkType to (lm.position.x / w to lm.position.y / h)
                     }
 
-                if (landmarks.isEmpty()) {
-                    Log.w("MlKitPoseDetector", "No landmarks detected with likelihood >= 0.3")
-                } else {
-                    Log.d("MlKitPoseDetector", "Detected ${landmarks.size} landmarks")
+                if (landmarks.isNotEmpty()) {
+                    Log.d("MlKitPoseDetector", "Detected ${landmarks.size} landmarks (min likelihood 0.1)")
                 }
+                
                 onResult(landmarks)
             }
             .addOnFailureListener { e ->
