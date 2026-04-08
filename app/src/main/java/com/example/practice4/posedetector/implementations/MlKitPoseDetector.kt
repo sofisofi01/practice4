@@ -18,8 +18,6 @@ class MlKitPoseDetector @Inject constructor() : IPoseDetector {
             .build()
     )
 
-    private val pushUpProcessor = PushUpProcessor()
-
     var lastCount = 0
         private set
 
@@ -31,14 +29,10 @@ class MlKitPoseDetector @Inject constructor() : IPoseDetector {
         detector.process(image)
             .addOnSuccessListener { pose ->
                 val landmarks = pose.allPoseLandmarks
-                    .filter { it.inFrameLikelihood >= 0.5f }
+                    .filter { it.inFrameLikelihood >= 0.3f }
                     .associate { lm ->
                         lm.landmarkType to (lm.position.x / w to lm.position.y / h)
                     }
-
-                if (landmarks.isNotEmpty()) {
-                    lastCount = pushUpProcessor.process(landmarks)
-                }
 
                 onResult(landmarks)
             }
