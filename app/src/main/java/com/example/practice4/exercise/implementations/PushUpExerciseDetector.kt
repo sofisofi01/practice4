@@ -14,10 +14,10 @@ class PushUpExerciseDetector @Inject constructor() : IExerciseDetector {
 
     companion object {
         private const val TAG = "PushUpExerciseDetector"
-        // Минимальная амплитуда движения плеч (5% от высоты кадра)
-        private const val MIN_AMPLITUDE = 0.05f 
-        private const val MIN_TIME_BETWEEN_MS = 800L
-        private const val HISTORY_SIZE = 60
+        // Минимальная амплитуда движения плеч (3% от высоты кадра)
+        private const val MIN_AMPLITUDE = 0.03f 
+        private const val MIN_TIME_BETWEEN_MS = 600L
+        private const val HISTORY_SIZE = 100
     }
 
     private val _count = MutableStateFlow(0)
@@ -33,10 +33,15 @@ class PushUpExerciseDetector @Inject constructor() : IExerciseDetector {
     private var lastCountTime = 0L
 
     override fun analyze(landmarks: Map<Int, Pair<Float, Float>>) {
+        if (landmarks.isEmpty()) return
+
         val leftShoulderY = landmarks[PoseLandmark.LEFT_SHOULDER]?.second
         val rightShoulderY = landmarks[PoseLandmark.RIGHT_SHOULDER]?.second
 
         if (leftShoulderY == null && rightShoulderY == null) {
+            if (System.currentTimeMillis() % 50 == 0L) {
+                Log.w(TAG, "Shoulders not found in landmarks: ${landmarks.keys}")
+            }
             return
         }
 
@@ -53,23 +58,28 @@ class PushUpExerciseDetector @Inject constructor() : IExerciseDetector {
         val maxY = yHistory.maxOrNull() ?: 0f
         val range = maxY - minY
 
-        // Если амплитуда движения слишком мала, не считаем это за отжимание
+        // Относительная позиция: 0.0 - верх (minY), 1.0 - низ (maxY)
+        val relativePos = if (range > 0) (currentY - minY) / range else 0.5f
+        
+        // Логируем каждые 10 кадров, чтобы не спамить, но видеть прогресс
+        if (System.currentTimeMillis() % 10 == 0L) {
+            Log.d(TAG, "curY=${String.format("%.3f", currentY)} range=${String.format("%.3f", range)} relPos=${String.format("%.2f", relativePos)} isDown=${_isDown.value}")
+        }
+
+        // Если амплитуда движения слишком мала, не меняем состояние
         if (range < MIN_AMPLITUDE) return
 
-        // Относительная позиция: 0.0 - верх (minY), 1.0 - низ (maxY)
-        // В Android Y растет вниз, поэтому maxY - это нижняя точка, minY - верхняя.
-        val relativePos = (currentY - minY) / range
         val now = System.currentTimeMillis()
 
-        if (!_isDown.value && relativePos > 0.8f) {
+        if (!_isDown.value && relativePos > 0.75f) {
             _isDown.value = true
-            Log.d(TAG, "DOWN detected (relPos=$relativePos, range=$range)")
-        } else if (_isDown.value && relativePos < 0.2f && (now - lastCountTime) >= MIN_TIME_BETWEEN_MS) {
+            Log.d(TAG, "!!! DOWN detected (relPos=$relativePos, range=$range)")
+        } else if (_isDown.value && relativePos < 0.25f && (now - lastCountTime) >= MIN_TIME_BETWEEN_MS) {
             _isDown.value = false
             _count.value++
             _timestamps.add(now)
             lastCountTime = now
-            Log.d(TAG, "UP detected — count=${_count.value} (relPos=$relativePos, range=$range)")
+            Log.d(TAG, "!!! UP detected — count=${_count.value} (relPos=$relativePos, range=$range)")
         }
     }
 

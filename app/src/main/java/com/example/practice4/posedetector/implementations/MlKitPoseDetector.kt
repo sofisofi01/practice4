@@ -34,6 +34,11 @@ class MlKitPoseDetector @Inject constructor() : IPoseDetector {
                         lm.landmarkType to (lm.position.x / w to lm.position.y / h)
                     }
 
+                if (landmarks.isEmpty()) {
+                    Log.w("MlKitPoseDetector", "No landmarks detected with likelihood >= 0.3")
+                } else {
+                    Log.d("MlKitPoseDetector", "Detected ${landmarks.size} landmarks")
+                }
                 onResult(landmarks)
             }
             .addOnFailureListener { e ->
