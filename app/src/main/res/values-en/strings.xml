@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Practice4</string>
+    <string name="change_quantity">Change quantity</string>
+    <string name="quantity">Quantity</string>
+    <string name="cancel">Cancel</string>
+    <string name="delete">Delete</string>
+    <string name="change">Change</string>
+    <string name="history">History</string>
+    <string name="stop">Stop</string>
+    <string name="start">Start</string>
+    <string name="pushaps">Pushups</string>
+    <string name="ok">OK</string>
+    <string name="sensor">Sensor</string>
+    <string name="camera">Camera</string>
+    <string name="pushups_count">%d pushups</string>
+</resources>

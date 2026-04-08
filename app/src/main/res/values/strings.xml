@@ -1,0 +1,16 @@
+<resources>
+    <string name="app_name">Practice4</string>
+    <string name="change_quantity">Изменить количество</string>
+    <string name="quantity">Количество</string>
+    <string name="cancel">Отмена</string>
+    <string name="delete">Удалить</string>
+    <string name="change">Изменить</string>
+    <string name="history">История</string>
+    <string name="stop">Стоп</string>
+    <string name="start">Старт</string>
+    <string name="pushaps">Отжимания</string>
+    <string name="ok">OK</string>
+    <string name="sensor">Сенсор</string>
+    <string name="camera">Камера</string>
+    <string name="pushups_count">%d отжиманий</string>
+</resources>
