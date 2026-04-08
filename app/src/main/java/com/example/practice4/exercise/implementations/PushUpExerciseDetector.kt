@@ -39,9 +39,44 @@ class PushUpExerciseDetector @Inject constructor() : IExerciseDetector {
         val rightShoulderY = landmarks[PoseLandmark.RIGHT_SHOULDER]?.second
 
         if (leftShoulderY == null && rightShoulderY == null) {
-            if (System.currentTimeMillis() % 50 == 0L) {
-                Log.w(TAG, "Shoulders not found in landmarks: ${landmarks.keys}")
-            }
+            return
+        }
+
+        val currentY = listOfNotNull(leftShoulderY, rightShoulderY).average().toFloat()
+        
+        yHistory.add(currentY)
+        if (yHistory.size > HISTORY_SIZE) {
+            yHistory.removeAt(0)
+        }
+
+        if (yHistory.size < 10) return
+
+        val minY = yHistory.minOrNull() ?: 0f
+        val maxY = yHistory.maxOrNull() ?: 0f
+        val range = maxY - minY
+
+        // Относительная позиция: 0.0 - верх (minY), 1.0 - низ (maxY)
+        val relativePos = if (range > 0.001f) (currentY - minY) / range else 0.5f
+        
+        // Логируем чаще для отладки
+        Log.d(TAG, "curY=${String.format("%.3f", currentY)} range=${String.format("%.3f", range)} relPos=${String.format("%.2f", relativePos)} isDown=${_isDown.value}")
+
+        // Если амплитуда движения слишком мала (меньше 2% высоты), не меняем состояние
+        if (range < 0.02f) return
+
+        val now = System.currentTimeMillis()
+
+        if (!_isDown.value && relativePos > 0.70f) {
+            _isDown.value = true
+            Log.d(TAG, "!!! DOWN detected (relPos=$relativePos, range=$range)")
+        } else if (_isDown.value && relativePos < 0.30f && (now - lastCountTime) >= MIN_TIME_BETWEEN_MS) {
+            _isDown.value = false
+            _count.value++
+            _timestamps.add(now)
+            lastCountTime = now
+            Log.d(TAG, "!!! UP detected — count=${_count.value} (relPos=$relativePos, range=$range)")
+        }
+    }
             return
         }
 
