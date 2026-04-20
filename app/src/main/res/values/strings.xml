@@ -13,4 +13,12 @@
     <string name="sensor">Сенсор</string>
     <string name="camera">Камера</string>
     <string name="pushups_count">%d отжиманий</string>
+    <string name="reminder_title">Пора тренироваться!</string>
+    <string name="reminder_text">Не забудьте выполнить упражнения сегодня.</string>
+    <string name="statistics">Статистика</string>
+    <string name="training">Тренировка</string>
+    <string name="set_reminder">Установить напоминание</string>
+    <string name="reminder_set">Напоминание установлено на %02d:%02d</string>
+    <string name="table_view">Таблица</string>
+    <string name="chart_view">График</string>
 </resources>

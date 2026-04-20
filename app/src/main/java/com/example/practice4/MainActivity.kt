@@ -27,6 +27,14 @@ import dagger.hilt.android.AndroidEntryPoint
 import java.text.SimpleDateFormat
 import java.util.*
 
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.List
+import androidx.compose.material.icons.filled.PlayArrow
+import androidx.compose.material3.CenterAlignedTopAppBar
+import com.example.practice4.notifications.NotificationHelper
+import com.example.practice4.ui.HistoryItem
+import com.example.practice4.ui.StatisticsScreen
+
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
     private val cameraPermission = registerForActivityResult(
@@ -35,11 +43,52 @@ class MainActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        
+        NotificationHelper(this).createNotificationChannel()
+
         cameraPermission.launch(Manifest.permission.CAMERA)
         enableEdgeToEdge()
         setContent {
             Practice4Theme {
-                PushUpScreen()
+                MainScreen()
+            }
+        }
+    }
+}
+
+@Composable
+fun MainScreen() {
+    var selectedTab by remember { mutableIntStateOf(0) }
+    
+    Scaffold(
+        topBar = {
+            CenterAlignedTopAppBar(
+                title = { 
+                    Text(if (selectedTab == 0) stringResource(R.string.training) else stringResource(R.string.statistics)) 
+                }
+            )
+        },
+        bottomBar = {
+            NavigationBar {
+                NavigationBarItem(
+                    selected = selectedTab == 0,
+                    onClick = { selectedTab = 0 },
+                    icon = { Icon(Icons.Default.PlayArrow, contentDescription = null) },
+                    label = { Text(stringResource(R.string.training)) }
+                )
+                NavigationBarItem(
+                    selected = selectedTab == 1,
+                    onClick = { selectedTab = 1 },
+                    icon = { Icon(Icons.Default.List, contentDescription = null) },
+                    label = { Text(stringResource(R.string.statistics)) }
+                )
+            }
+        }
+    ) { padding ->
+        Box(modifier = Modifier.padding(padding)) {
+            when (selectedTab) {
+                0 -> PushUpScreen()
+                1 -> StatisticsScreen(hiltViewModel())
             }
         }
     }
@@ -61,16 +110,12 @@ fun PushUpScreen(
     val trackingMode by viewModel.trackingMode.collectAsState()
     val history by viewModel.history.collectAsState()
 
-    Scaffold(
-        topBar = { TopAppBar(title = { Text(stringResource(R.string.pushaps)) }) }
-    ) { padding ->
-        LazyColumn(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(padding)
-                .padding(horizontal = 16.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
+    LazyColumn(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(horizontal = 16.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
             item {
                 Spacer(modifier = Modifier.height(8.dp))
                 Row(verticalAlignment = Alignment.CenterVertically) {
@@ -127,66 +172,4 @@ fun PushUpScreen(
                 )
             }
         }
-    }
-}
-
-@Composable
-fun HistoryItem(
-    entity: PushUpEntity,
-    onUpdate: (PushUpEntity) -> Unit,
-    onDelete: (PushUpEntity) -> Unit
-) {
-    var showDialog by remember { mutableStateOf(false) }
-    val dateFormat = SimpleDateFormat("dd.MM.yyyy HH:mm", Locale.getDefault())
-
-    Card(
-        modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp)
-    ) {
-        Row(
-            modifier = Modifier.fillMaxWidth().padding(16.dp),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Column {
-                Text(stringResource(R.string.pushups_count, entity.count), style = MaterialTheme.typography.bodyLarge)
-                Text(dateFormat.format(Date(entity.timestamp)), style = MaterialTheme.typography.bodySmall)
-            }
-            Row {
-                TextButton(onClick = { showDialog = true }) { Text(stringResource(R.string.change)) }
-                TextButton(onClick = { onDelete(entity) }) { Text(stringResource(R.string.delete)) }
-            }
-        }
-    }
-
-    if (showDialog) {
-        EditDialog(
-            entity = entity,
-            onDismiss = { showDialog = false },
-            onConfirm = { newCount -> onUpdate(entity.copy(count = newCount)); showDialog = false }
-        )
-    }
-}
-
-@Composable
-fun EditDialog(entity: PushUpEntity, onDismiss: () -> Unit, onConfirm: (Int) -> Unit) {
-    var text by remember { mutableStateOf(entity.count.toString()) }
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        title = { Text(stringResource(R.string.change_quantity)) },
-        text = {
-            TextField(
-                value = text,
-                onValueChange = { text = it },
-                label = { Text(stringResource(R.string.quantity)) }
-            )
-        },
-        confirmButton = {
-            TextButton(onClick = { text.toIntOrNull()?.let { onConfirm(it) } }) {
-                Text(stringResource(R.string.ok))
-            }
-        },
-        dismissButton = {
-            TextButton(onClick = onDismiss) { Text(stringResource(R.string.cancel)) }
-        }
-    )
 }
