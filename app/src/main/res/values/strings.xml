@@ -21,4 +21,7 @@
     <string name="reminder_set">Напоминание установлено на %02d:%02d</string>
     <string name="table_view">Таблица</string>
     <string name="chart_view">График</string>
+    <string name="no_data_chart">Нет данных для графика</string>
+    <string name="notification_channel_name">Напоминания об упражнениях</string>
+    <string name="notification_channel_description">Напоминает о необходимости выполнить упражнения</string>
 </resources>

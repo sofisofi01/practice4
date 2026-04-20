@@ -9,9 +9,20 @@
     <string name="history">History</string>
     <string name="stop">Stop</string>
     <string name="start">Start</string>
-    <string name="pushaps">Pushups</string>
+    <string name="pushaps">Push-ups</string>
     <string name="ok">OK</string>
     <string name="sensor">Sensor</string>
     <string name="camera">Camera</string>
-    <string name="pushups_count">%d pushups</string>
+    <string name="pushups_count">%d push-ups</string>
+    <string name="reminder_title">Time to exercise!</string>
+    <string name="reminder_text">Don\'t forget to do your exercises today.</string>
+    <string name="statistics">Statistics</string>
+    <string name="training">Training</string>
+    <string name="set_reminder">Set reminder</string>
+    <string name="reminder_set">Reminder set for %02d:%02d</string>
+    <string name="table_view">Table</string>
+    <string name="chart_view">Chart</string>
+    <string name="no_data_chart">No data for chart</string>
+    <string name="notification_channel_name">Exercise Reminders</string>
+    <string name="notification_channel_description">Reminds you to do your exercises</string>
 </resources>

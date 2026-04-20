@@ -23,10 +23,10 @@ class NotificationHelper(private val context: Context) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             val channel = NotificationChannel(
                 CHANNEL_ID,
-                "Exercise Reminders",
+                context.getString(R.string.notification_channel_name),
                 NotificationManager.IMPORTANCE_DEFAULT
             ).apply {
-                description = "Reminds you to do your exercises"
+                description = context.getString(R.string.notification_channel_description)
             }
             notificationManager.createNotificationChannel(channel)
         }
