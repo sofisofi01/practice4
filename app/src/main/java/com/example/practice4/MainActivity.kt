@@ -37,16 +37,23 @@ import com.example.practice4.ui.StatisticsScreen
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
-    private val cameraPermission = registerForActivityResult(
-        ActivityResultContracts.RequestPermission()
-    ) {}
+    private val requestPermissionLauncher = registerForActivityResult(
+        ActivityResultContracts.RequestMultiplePermissions()
+    ) { permissions ->
+        // Обработка разрешений если необходимо
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         
         NotificationHelper(this).createNotificationChannel()
 
-        cameraPermission.launch(Manifest.permission.CAMERA)
+        val permissions = mutableListOf(Manifest.permission.CAMERA)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            permissions.add(Manifest.permission.POST_NOTIFICATIONS)
+        }
+        requestPermissionLauncher.launch(permissions.toTypedArray())
+
         enableEdgeToEdge()
         setContent {
             Practice4Theme {

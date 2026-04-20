@@ -142,11 +142,27 @@ private fun setAlarm(context: android.content.Context, hour: Int, minute: Int) {
         }
     }
 
-    alarmManager.setExactAndAllowWhileIdle(
-        android.app.AlarmManager.RTC_WAKEUP,
-        calendar.timeInMillis,
-        pendingIntent
-    )
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+        if (alarmManager.canScheduleExactAlarms()) {
+            alarmManager.setExactAndAllowWhileIdle(
+                android.app.AlarmManager.RTC_WAKEUP,
+                calendar.timeInMillis,
+                pendingIntent
+            )
+        } else {
+            alarmManager.setAndAllowWhileIdle(
+                android.app.AlarmManager.RTC_WAKEUP,
+                calendar.timeInMillis,
+                pendingIntent
+            )
+        }
+    } else {
+        alarmManager.setExactAndAllowWhileIdle(
+            android.app.AlarmManager.RTC_WAKEUP,
+            calendar.timeInMillis,
+            pendingIntent
+        )
+    }
     
     android.widget.Toast.makeText(
         context, 
